@@ -1,0 +1,347 @@
+王伟超   wangweichao@tedu.cn   备注：班级-姓名-代码
+
+1、第四阶段课程介绍 - 总时长：13个工作日
+   1.1》爬虫(7天)
+	      爬虫工程师
+				其他岗位附加技能（后端开发、数据分析）
+   1.2》Hadoop(3天)
+	      数据分析岗位的附加技能
+   1.3》数据结构(3天)
+	      所有技术岗位的附加技能
+2、第四阶段课程特点
+   2.1》爬虫：综合、不确定性
+	      第一阶段、MySQL、MongoDB、Redis、re、多线程、
+				多进程、进程锁、队列、HTML、JavaScript......
+	 2.2》Hadoop：抽象
+	 2.3》数据结构：抽象
+3、爬虫分类
+   3.1》通用网络爬虫 - 搜索引擎,需要遵守robots协议
+	      ROBOTS协议：网站通过ROBOTS协议告诉搜索引擎哪些
+				页面可以抓取,哪些页面不能抓(君子协议)
+	 3.2》聚焦网络爬虫
+4、请求模块-requests
+   4.1》resp = requests.get(url='',headers={})
+	 4.2》响应对象属性
+	      4.2.1》text : 响应内容 - 字符串
+				4.2.2》content : 响应内容 - bytes
+				4.2.3》status_code : HTTP响应码
+				4.2.4》url : 返回实际数据的URL地址
+5、编码模块-urllib.parse
+   5.1》urlencode({})
+	 5.2》quote('')
+	 5.3》unquote('')
+6、解析模块-re
+   6.1》使用流程：r_list = re.findall(regex, html, re.S)
+	 6.2》正则分组：需要抓取什么数据就加(.*?)
+	      情况1：[] 要么是正则问题,要么是响应问题
+				情况2：['', '', ...] 正则中一个分组
+				情况3：[(), (), ...] 正则中多个分组
+7、数据抓取流程
+   7.1》确认数据来源 - 右键查看网页源代码,搜索关键字
+	 7.2》存在:观察URL地址的规律
+	 7.3》写正则表达式 | xpath表达式
+	 7.4》写程序
+	      细节1：必须使用随机User-Agent
+				细节2：必须控制数据抓取的频率
+8、数据持久化代码流程 - MySQL
+   8.1》__init__() 创建数据库连接对象和游标对象
+	 8.2》数据处理函数中,将数据处理为列表,存入数据库
+	 8.3》所有页的数据抓取完成后,断开数据库的连接(crawl())
+   def __init__(self):
+	     self.db = pymysql.connect('', '', '', ....)
+			 self.cur = self.db.cursor()
+	 def save_html(self):
+	     self.cur.execute('', [])
+			 self.db.commit()
+	 def crawl(self):
+	     self.cur.close()
+			 self.db.close()
+9、数据持久化代码流程 - csv
+   9.1》__init__() 打开文件,创建csv文件写入对象
+	 9.2》数据处理器函数中,将数据处理为列表,写入csv文件
+	 9.3》所有页的数据抓取完成后,关闭文件(crawl())
+   def __init__(self):
+	     self.f = open('test.csv', 'w') 
+			 self.writer = csv.writer(self.f)
+	 def save_html(self):
+	     self.writer.writerow([])
+	 def crawl(self):
+	     self.f.close()
+10、数据持久化代码流程 - MongoDB
+   10.1》__init__() 创建连接对象、库对象、集合对象
+	 10.2》数据处理函数中,将数据处理为字典,存入数据库
+	 def __init__(self):
+	     self.conn = pymongo.MongoClient('', 27017)
+			 self.db = self.conn['库名']
+			 self.myset = self.db['集合名']
+	 def save_html(self):
+	     self.myset.insert_one({})
+11、数据持久化方法总结
+   11.1》MySQL
+	       cur.execute(['','','',...])
+				 cur.executemany([(),(),...()])
+	 11.2》csv
+	       writer.writerow(['','',...])
+				 writer.writerows([(),(),...])
+	 11.3》MongoDB
+	       myset.insert_one({})
+				 myset.insert_many([{},{},....])
+12、两级或者多级页面数据抓取流程
+   11.1》需要定义功能函数(请求、解析)
+	 11.2》主线函数:一级页面解析函数
+	       一旦提取出需要继续跟进的URL地址,则写个函数
+				 把所有的事情都做了,然后再遍历下一个URL地址
+13、Chrome浏览器安装插件
+   1、安装方法
+	    1.1》浏览器找到更多工具-扩展程序-点开开发者模式
+			1.2》将解压后的谷歌访问助手拖拽到浏览器中
+			1.3》通过谷歌访问助手进入到Chrome应用商店在线安装
+   2、爬虫常用插件
+	    2.1》Xpath Helper
+			     开启|关闭：Ctrl + Shift + x
+			2.2》JsonView：格式化输出JSON数据
+14、xpath表达式最终梳理
+   14.1》结果:列表中放节点对象
+	            [<element div at xxx>, <element div ...]
+	            //div/p
+							//ul[@class="xxx"]/li//div
+							//dl//dd[@id="xxx"]/p[2]
+	 14.2》结果:列表中放字符串
+	            ['','','',....]
+							//div/p/text()
+							//li[contains(@id,"abc")]/a/@title
+							//li[@name="abc"]//a/@href
+15、建立User-Agent池
+   from fake_useragent import UserAgent
+	 headers = {'User-Agent':UserAgent().random}
+16、lxml+xpath使用流程
+   from lxml import etree
+	 eobj = etree.HTML(resp.content.decode('gb2312','ignore))
+	 div_list = eobj.xpath('//div')
+	 for div in div_list:
+	     item = {}
+			 name_list = div.xpath('.//a/text()')
+			 item['name'] = name_list[0].strip() if name_list else None
+17、经典反爬 - 响应内容和前端HTML不一致
+   17.1》遇到的情况
+	      17.1.1》响应内容中存在要抓取的数据
+				17.1.2》浏览器中xpath helper能正常显示数据
+				17.1.3》程序中打印html也有正常数据
+	      但是: 程序中匹配出来都是空列表 []
+				解决: 查看响应内容(右键查看网页源代码),
+				      以响应内容为准重新调整正则或xpath表达式
+   17.2》永远铭记
+	     页面中的xpath不能全信！一切以响应内容为准！
+18、os模块使用
+   18.1》os.path.exists('路径')
+         路径存在: True
+				 路径不存在: False
+	 18.2》os.makedirs('路径')
+	       递归地创建指定的路径
+	 18.3》平时爬虫使用
+	       if not os.path.exists('路径'):
+				     os.makedirs('路径')
+19、保存文件
+   with open(filename, 'wb') as f:
+	      f.write(html)
+	 filename: 普通文件名,则文件保存到当前路径
+	 filename: 文件名的绝对路径,则文件保存到绝对路径
+20、目前反爬总结
+   20.1》基于headers反爬虫
+	       机制：检查User-Agent、Cookie、Referer
+				 解决方案：F12抓取到对应的headers,放到参数中
+	 20.2》基于User-Agent频率
+	       机制：检查同一个User-Agent访问的频率
+				 解决方案：建立User-Agent池,利用fake_useragent模块
+	 20.3》基于IP频率
+	       机制：检查同一个IP地址访问的频率
+				 解决方案：建立代理IP池(免费、私密代理)
+	 20.4》响应内容和前端HTML结构不一致
+	       机制：由JS对响应内容做调整
+				 解决方案：查看响应内容,以响应内容为主调整正则或xpath
+   20.5》JS加密 - 有道翻译
+	       机制：查询参数或Form表单数据中使用JS加密
+				 解决方案：抓取对应的JS文件,用Python实现相同加密算法
+	 20.6》JS逆向 - 百度翻译
+	       机制：JS加密很复杂,无法用Python直接实现
+				 解决方案：抓取对应的JS文件,利用pyexecjs模块
+				 进行加密JS代码的调试和执行
+   20.7》Ajax动态加载 - 豆瓣电影
+	       机制：数据是JS动态加载出来的,响应内容中没有
+				 解决方案：F12抓取对应网络数据包,
+				   GET请求: Request URL、QueryString Parameters
+           POST请求:Request URL、Form Data
+21、请求模块总结 - requests模块
+   21.1》requests.get()
+         url
+	       headers
+	       timeout
+	       proxies = {
+	           'http' : 'http://[uname:pwd@]IP:PORT',
+						 'https' : 'https://[uname:pwd@]IP:PORT',
+	       }
+   21.2》requests.post()
+	       data = {}
+22、解析模块总结
+   22.1》re
+	       r_list = re.findall('正则', html, re.S)
+	 22.2》lxml + xpath
+	       from lxml import etree
+				 eobj = etree.HTML(html)
+				 div_list = eobj.xpath('')
+23、数据抓取最终梳理
+   23.1》确认数据来源 - 响应内容中存在
+	    23.1.1》查看页面结构,观察URL地址规律
+			23.1.2》写正则表达式 或 xpath表达式
+			23.1.3》完成程序(随机UA、随机IP、控制频率)
+	 23.2》确认数据来源 - 响应内容中不存在
+	    23.2.1》F12或抓包工具抓取具体网络数据包
+			23.2.2》分析网络数据包
+			        GET请求: Request URL、QueryString
+							POST请求:Request URL、Form Data
+			23.2.3》如果查询参数或Form表单数据有加密,则进一步
+			        抓取JS文件分析处理
+			23.2.4》完善程序(.json()方法获取响应内容)
+24、多线程爬虫流程
+   24.1》知识点
+	       线程模块: from threading import Thread
+				 队列模块: from queue import Queue
+				 线程锁:   from threading import Lock
+   24.2》代码流程
+	       先让URL地址入队列: def url_to_queue()
+				 线程事件函数: 获取地址(加锁)+请求+解析+数据处理
+         创建多线程,开始执行
+25、selenium爬虫
+   25.1》优点: 简单,无需过多去分析页面结构以及数据来源
+	             使用的是真实的浏览器
+	 25.2》缺点: 效率低
+	             提取数据的速度相当慢
+							 需要给页面元素的加载预留时间
+							 (注意:一旦点击或滑动鼠标,一定要休眠)
+26、scrapy五大组件工作流程
+   26.1》引擎(ENGINE):框架核心
+	 26.2》爬虫文件(SPIDER): 负责数据解析提取
+	 26.3》调度器(SCHEDULER): 负责维护请求队列
+	 26.4》下载器(DOWNLOADERS):负责发请求获取响应对象
+	 26.5》项目管道(PIPELINE):负责数据处理
+	 下载器中间件:调度器(request)->中间件->下载器
+	 蜘蛛中间件:  下载器(response)->中间件->爬虫文件
+
+	 爬虫项目启动时,引擎找到爬虫文件索要第一批要抓取的
+	 URL地址,交给调度器入队列,调度器生成请求指纹处理后
+	 出队列,经过下载器中间件交给下载器下载,下载器下载
+	 完成后,得到响应对象,最终经过蜘蛛中间件交给爬虫文件
+	 爬虫提取的数据交给项目管道文件处理,如果有继续需要
+	 跟进的请求,则继续交给调度器入队列,如此循环。
+27、scrapy常用命令
+   scrapy startproject 项目名
+	 scrapy genspider 爬虫名 允许抓取的域名
+	   allowed_domains = ['sina.com.cn']
+		 娱乐能抓: https://ent.sina.com.cn/
+		 医药能抓: http://med.sina.com.cn/
+		 ... ...
+	 scrapy crawl 爬虫名
+28、scrapy爬虫流程
+   28.1》scrapy startproject 项目名
+	       cd 项目名
+				 scrapy genspider 爬虫名 允许抓取的域名
+	 28.2》items.py(定义抓取的数据结构)
+	       import scrapy
+				 class BaiduItem(scrapy.Item):
+				     name = scrapy.Field()
+						 href = scrapy.Field()
+	 28.3》spider.py(具体解析提取数据)
+         import scrapy
+				 class BaiduSpider(scrapy.Spider):
+				     name = 'baidu'
+						 allowed_domains = ['baidu.com']
+						 start_urls = ['起始的URL地址']
+
+						 def parse(self, response):
+						     pass
+	 28.4》pipelines.py(负责数据入库处理)
+	 28.5》settings.py(全局配置)
+	       USER_AGENT = ''
+				 ROBOSTSTXT_OBEY = False
+				 CONCURRENT_REQUESTS = 32
+				 DOWNLOAD_DELAY = 1
+				 COOKIES_ENABLED = False
+				 DEFAULT_REQUEST_HEADERS = {'Cookie':'', ...}
+				 ITEM_PIPELINES = {}
+	 28.6》run.py(运行爬虫-同名目录同路径)
+	       from scrapy import cmdline
+				 cmdline.execute('scrapy crawl 爬虫名'.split())
+29、响应对象response
+   29.1》response.text
+	 29.2》response.body
+   29.3》response.xpath('') : [<selector>,<>,...]
+	 29.2》extract() : ['', '', '']
+	 29.3》extract_first() 或者 get() : ''
+30、爬虫项目启动的两种方式
+   30.1》基于start_urls变量
+	 30.2》重写start_requests()方法
+31、数据提交的两种方式
+   31.1》提取的数据交给管道文件: yield item
+	 31.2》链接交给调度器入队列
+	       yield scrapy.Request()
+         url=''
+				 callback=self.解析函数名
+				 headers={}
+				 cookies={}
+				 meta={}   # 在多个解析函数之间传递数据
+				 dont_filter=True|False : 进入调度器的请求是否参与去重
+32、数据持久化
+   32.1》csv : scrapy crawl 爬虫名 -o xxx.csv
+	 32.2》json: scrapy crawl 爬虫名 -o xxx.json
+	             FEED_EXPORT_ENCODING = '字符编码'
+				 常规字符编码:gbk gb2312 gb18030 utf-8
+	 32.3》MySQL
+	       32.3.1》pipelines.py新建类
+				         def open_spider(self, spider):
+								 def close_spider(self, spider):
+								 def process_item(self, item, spider):
+								     必须要return item
+				 32.3.2》settings.py添加管道(ITEM_PIPELINES)
+   32.4》MongoDB
+	       32.4.1》pipelines.py新建类
+				 32.4.2》settings.py中添加管道
+33、多级页面数据抓取
+   利用scrapy.Request()中的meta参数
+	 原则：不管几级页面,必须要等一条完整的item数据抓取
+	       完成后,再yield item交给管道文件处理
+34、scrapy处理Cookie
+   34.1》COOKIES_ENABLED = False
+	       DEFAULT_REQUEST_HEADERS = {'Cookie':''}
+	 34.2》COOKIES_ENABLED = True
+	       爬虫文件:处理Cookie为字典,利用cookies参数
+35、分布式爬虫
+   35.1》分布式爬虫原理
+	       多台主机共享一个爬取队列
+	 35.2》为什么使用Redis
+	       Redis基于内存,速度快
+				 Redis中有集合数据类型,可以存储请求指纹
+36、分布式爬虫实现一
+   36.1》首先完成scrapy爬虫 - 非分布式
+	 36.2》配置settings.py为分布式
+	       重新指定调度器：SCHEDULER = ''
+				 重新指定去重机制：DUPEFILTER_CLASS = ''
+				 设置不清除请求指纹：SCHEDULER_PERSIST = 
+				 指定Redis的IP地址：REDIS_HOST = ''
+				 指定Redis的端口号：REDIS_PORT = 6379
+				 添加Redis的管道：ITEM_PIPELINES = {'':200}
+   36.3》把scrapy项目代码拷贝到多台爬虫服务器开始运行
+37、分布式爬虫实现二
+   37.1》完成scrapy爬虫 - 非分布式
+	 37.2》配置settings.py
+	 37.3》爬虫文件中添加redis_key
+	 37.4》把项目代码拷贝到分布式爬虫的所有服务器上开始运行
+	 37.5》Redis命令行,用LPUSH命令压入第一页URL地址
+	       所有的爬虫服务器都开始进行数据抓取
+
+
+
+
+
+
+
+

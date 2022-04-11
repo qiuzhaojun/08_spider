@@ -1,0 +1,15 @@
+                    一定要把整个抓包分析流程多多熟悉几遍
+                    一定要把整个抓包分析流程多多熟悉几遍
+
+   html = requests.post(url=url, data=data, headers=headers).text
+
+   目标1: 获取url参数
+          POST地址：一定是F12抓包抓到的URL地址
+
+   目标2: 获取data参数
+          F12抓包抓到的Form Data,用pycharm处理成字典
+
+   目标3: 获取headers参数
+          F12抓包抓到的headers，用pycharm处理成字典
+
+
